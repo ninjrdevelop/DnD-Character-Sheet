@@ -1,3 +1,59 @@
+<script>
+
+	import StatBlock from 'StackBlock.svelte';
+
+	let stats = {
+		strength: 16,
+		dexterity: 12,
+		constitution: 14,
+		wisdom: 18,
+		intelligence: 20,
+		charisma: 8
+	}
+
+	let stat_mods = {
+		strength: 0,
+		dexterity: 0,
+		constitution: 0,
+		wisdom: 0,
+		intelligence: 0,
+		charisma: 0
+	}
+
+	$: stat_mods.strength = Math.floor((stats.strength - 10) / 2);
+	$: stat_mods.dexterity = Math.floor((stats.dexterity - 10) / 2);
+	$: stat_mods.constitution = Math.floor((stats.constitution - 10) / 2);
+	$: stat_mods.wisdom = Math.floor((stats.wisdom - 10) / 2);
+	$: stat_mods.intelligence = Math.floor((stats.intelligence - 10) / 2);
+	$: stat_mods.charisma = Math.floor((stats.charisma - 10) / 2);
+
+	let saving_throws = {
+		strength: {proficiency: 0, profLabel:"", modifier: 0},
+		dexterity: {proficiency: 0, profLabel:"", modifier: 0},
+		constitution: {proficiency: 0, profLabel:"", modifier: 0},
+		wisdom: {proficiency: 0, profLabel:"", modifier: 0},
+		intelligence: {proficiency: 0, profLabel:"", modifier: 0},
+		charisma: {proficiency: 0, profLabel:"", modifier: 0}
+	}
+
+	// let proficiencyTypes = 
+	let proficiencyNames = ["", "*", "1/2", "2x"];
+	let proficiencyValues= [0,   1,   0.5,   2];
+
+	function changeProfType(arr, stat) {
+		let curProf = arr[stat].proficiency
+		let index = proficiencyValues.indexOf(curProf) + 1;
+		
+		if (index > proficiencyValues.length) index -= proficiencyValues.length;
+
+		arr[stat].proficiency = proficiencyValues[index];
+		arr[stat].profLabel = proficiencyNames[index];
+	}
+
+	// Test
+
+</script>
+
 <form class="charsheet">
 	<header>
 		<section class="charname">
@@ -29,58 +85,10 @@
 	<main>
 		<section>
 			<section class="attributes">
-				<div class="scores">
-					<ul>
-						<li>
-							<div class="score">
-								<label for="strengthscore">Strength</label><input name="strengthscore" type="number" bind:value={stats.strength} placeholder="10" />
-							</div>
-							<div class="modifier">
-								<input name="strengthmod" value="{stat_mods.strength}" />
-							</div>
-						</li>
-						<li>
-							<div class="score">
-								<label for="dexterityscore">Dexterity</label><input name="dexterityscore" type="number" bind:value={stats.dexterity} placeholder="10" />
-							</div>
-							<div class="modifier">
-								<input name="dexteritymod" value="{stat_mods.dexterity}" />
-							</div>
-						</li>
-						<li>
-							<div class="score">
-								<label for="constitutionscore">Constitution</label><input name="constitutionscore" type="number" bind:value={stats.constitution} placeholder="10" />
-							</div>
-							<div class="modifier">
-								<input name="constitutionmod" value="{stat_mods.constitution}" />
-							</div>
-						</li>
-						<li>
-							<div class="score">
-								<label for="wisdomscore">Wisdom</label><input name="wisdomscore" placeholder="10" type="number" bind:value={stats.wisdom} />
-							</div>
-							<div class="modifier">
-								<input name="wisdommod" value="{stat_mods.wisdom}" />
-							</div>
-						</li>
-						<li>
-							<div class="score">
-								<label for="intelligencescore">Intelligence</label><input name="intelligencescore" type="number" bind:value={stats.intelligence} placeholder="10" />
-							</div>
-							<div class="modifier">
-								<input name="intelligencemod" value="{stat_mods.intelligence}" />
-							</div>
-						</li>
-						<li>
-							<div class="score">
-								<label for="charismascore">Charisma</label><input name="charismascore" type="number" bind:value={stats.charisma} placeholder="10" />
-							</div>
-							<div class="modifier">
-								<input name="charismamod" value="{stat_mods.charisma}" />
-							</div>
-						</li>
-					</ul>
-				</div>
+				<!-- Stackblock component! -->
+				<StatBlock />
+
+
 				<div class="attr-applications">
 					<div class="inspiration box">
 						<div class="label-container">
@@ -368,60 +376,6 @@
 	</main>
 </form>
 
-<script>
-
-	let stats = {
-		strength: 16,
-		dexterity: 12,
-		constitution: 14,
-		wisdom: 18,
-		intelligence: 20,
-		charisma: 8
-	}
-
-	let stat_mods = {
-		strength: 0,
-		dexterity: 0,
-		constitution: 0,
-		wisdom: 0,
-		intelligence: 0,
-		charisma: 0
-	}
-
-	$: stat_mods.strength = Math.floor((stats.strength - 10) / 2);
-	$: stat_mods.dexterity = Math.floor((stats.dexterity - 10) / 2);
-	$: stat_mods.constitution = Math.floor((stats.constitution - 10) / 2);
-	$: stat_mods.wisdom = Math.floor((stats.wisdom - 10) / 2);
-	$: stat_mods.intelligence = Math.floor((stats.intelligence - 10) / 2);
-	$: stat_mods.charisma = Math.floor((stats.charisma - 10) / 2);
-
-	let saving_throws = {
-		strength: {proficiency: 0, profLabel:"", modifier: 0},
-		dexterity: {proficiency: 0, profLabel:"", modifier: 0},
-		constitution: {proficiency: 0, profLabel:"", modifier: 0},
-		wisdom: {proficiency: 0, profLabel:"", modifier: 0},
-		intelligence: {proficiency: 0, profLabel:"", modifier: 0},
-		charisma: {proficiency: 0, profLabel:"", modifier: 0}
-	}
-
-	// let proficiencyTypes = 
-	let proficiencyNames = ["", "*", "1/2", "2x"];
-	let proficiencyValues= [0,   1,   0.5,   2];
-
-	function changeProfType(arr, stat) {
-		let curProf = arr[stat].proficiency
-		let index = proficiencyValues.indexOf(curProf) + 1;
-		
-		if (index > proficiencyValues.length) index -= proficiencyValues.length;
-
-		arr[stat].proficiency = proficiencyValues[index];
-		arr[stat].profLabel = proficiencyNames[index];
-	}
-
-	// Test
-
-</script>
-
 <style>
 	textarea {
 		font-size: 12px;
@@ -572,56 +526,6 @@
 		display: flex;
 		flex-direction: row;
 		justify-content: space-between;
-	}
-	form.charsheet main > section section.attributes div.scores {
-		width: 101px;
-		background-color: #bbb;
-		border-radius: 10px;
-		padding-bottom: 5px;
-	}
-	form.charsheet main > section section.attributes div.scores label {
-		font-size: 8px;
-		font-weight: bold;
-	}
-	form.charsheet main > section section.attributes div.scores ul {
-		display: flex;
-		flex-direction: column;
-		justify-content: space-around;
-		align-items: center;
-		height: 100%;
-	}
-	form.charsheet main > section section.attributes div.scores ul li {
-		height: 80px;
-		width: 70px;
-		background-color: white;
-		border: 1px solid black;
-		text-align: center;
-		display: flex;
-		flex-direction: column;
-		border-radius: 10px;
-	}
-	form.charsheet main > section section.attributes div.scores ul li input {
-		width: 100%;
-		padding: 0;
-		border: 0;
-	}
-	form.charsheet main > section section.attributes div.scores ul li div.score input {
-		text-align: center;
-		font-size: 40px;
-		padding: 2px 0px 0px 0px;
-		background: white;
-	}
-	form.charsheet main > section section.attributes div.scores ul li div.modifier {
-		margin-top: 3px;
-	}
-	form.charsheet main > section section.attributes div.scores ul li div.modifier input {
-		background: white;
-		width: 30px;
-		height: 20px;
-		border: 1px inset black;
-		border-radius: 20px;
-		margin: -1px;
-		text-align: center;
 	}
 	form.charsheet main > section section.attributes div.attr-applications div.inspiration {
 		display: flex;
