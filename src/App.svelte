@@ -145,26 +145,38 @@
 	}
 
 	function updateHealth(amount) {
-		console.log(character.health);
+		// Subtracting health
 		if (amount < 0) {
-			let left = amount;
+			// If we've got temporary hitpoints, take these first
 			if (character.health.temporary > 0) {
-				character.health.temporary -= left;
+				// Add the (negative) adjustment amount to our temporary health total
+				character.health.temporary += amount;
 
-				if (left < 0) {
+				// If that brings our temporary health under 0
+				if (character.health.temporary < 0) {
+					// Get the leftover
+					let left = Math.abs(character.health.temporary);
+					// Reset temporary to 0
 					character.health.temporary = 0;
-					character.health.current -= Math.absolute(left);
+					// And take the leftover from our health pool
+					character.health.current -= left;
 				}
 			} 
+			// No temporary hitpoints
+			else {
+				// Add the (negative) adjustment amount to our current health total
+				character.health.current += amount;
+			}
 		}
+		// We're adding health
 		else {
+			// Add the health
 			character.health.current = character.health.current + amount;
 
+			// Ensure we don't go over our maximum
 			if (character.health.current > character.health.maximum)
 				character.health.current = character.health.maximum;
 		}
-
-		console.log(character.health);
 	}
 
 	// Helper function to capitalise first letter of a string
@@ -230,7 +242,7 @@
 							<li>
 								<label for="{small_name}">{name} <span class="skill">({capitalise(stat)})</span></label>
 								<input name="{small_name}" type="text" bind:value="{character.ability_mods[small_name].modifier}" />
-								<div class="prof_button" on:click="{changeProfType(character.ability_mods, small_name)}">{character.ability_mods[small_name].profLabel}</div>
+								<div class="prof_button" on:click="{e => changeProfType(character.ability_mods, small_name)}">{character.ability_mods[small_name].profLabel}</div>
 							</li>
 							{/each}
 						</ul>
@@ -278,17 +290,17 @@
 						<div class="current">
 							<label for="currenthp">Current Hit Points</label>
 							<div style="margin: auto;">
-								<span class="hp_button" on:click="{updateHealth(-5)}">-5</span>
-								<span class="hp_button" on:click="{updateHealth(-1)}">-1</span>
-								<span class="hp_button" on:click="{updateHealth(1)}">+1</span>
-								<span class="hp_button" on:click="{updateHealth(5)}">+5</span>
+								<span class="hp_button" on:click="{e => updateHealth(-5)}">-5</span>
+								<span class="hp_button" on:click="{e => updateHealth(-1)}">-1</span>
+								<span class="hp_button" on:click="{e => updateHealth(1)}">+1</span>
+								<span class="hp_button" on:click="{e => updateHealth(5)}">+5</span>
 							</div>
 							<input name="currenthp" type="number" bind:value="{character.health.current}" />
 						</div>
 					</div>
 					<div class="temporary">
 						<label for="temphp">Temporary Hit Points</label>
-						<input name="temphp" type="number" />
+						<input name="temphp" type="number" bind:value="{character.health.temporary}" />
 					</div>
 				</div>
 				<div class="hitdice">
