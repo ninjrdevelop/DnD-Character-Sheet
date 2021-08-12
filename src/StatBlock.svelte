@@ -1,9 +1,9 @@
 <script>
+	console.log('wtf');
 	import { createEventDispatcher } from 'svelte';
 
 	export let stats = {};
-
-	
+	export let stat_mods = {};
 </script>
 
 <div class="scores">
