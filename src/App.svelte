@@ -485,6 +485,8 @@
 		line-height: 35px;
 		text-align: center;
 
+		border-radius: 10px;
+
 
 		-webkit-user-select: none;  
 		-moz-user-select: none;    
