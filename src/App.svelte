@@ -8,7 +8,8 @@
 		{name: 'dexterity', short: 'dex'}, 
 		{name: 'constitution', short: 'con'}, 
 		{name: 'wisdom', short: 'wis'}, 
-		{name: 'intelligence', short: 'int'}
+		{name: 'intelligence', short: 'int'},
+		{name: 'charisma', short: 'cha'}
 	];
 
 	let abilitylist = [
@@ -33,6 +34,11 @@
 	]
 
 	let character = {
+		health: {
+			current: 0,
+			maximum: 10,
+			temporary: 0
+		},
 		stats: {
 			strength: 10,
 			dexterity: 10,
@@ -138,6 +144,29 @@
 		character.proficiency = character.proficiency;
 	}
 
+	function updateHealth(amount) {
+		console.log(character.health);
+		if (amount < 0) {
+			let left = amount;
+			if (character.health.temporary > 0) {
+				character.health.temporary -= left;
+
+				if (left < 0) {
+					character.health.temporary = 0;
+					character.health.current -= Math.absolute(left);
+				}
+			} 
+		}
+		else {
+			character.health.current = character.health.current + amount;
+
+			if (character.health.current > character.health.maximum)
+				character.health.current = character.health.maximum;
+		}
+
+		console.log(character.health);
+	}
+
 	// Helper function to capitalise first letter of a string
 	function capitalise(str) {
 		return str[0].toUpperCase() + str.substring(1)
@@ -225,39 +254,52 @@
 			<section class="combat">
 				<div class="armorclass">
 					<div>
-						<label for="ac">Armor Class</label><input name="ac" placeholder="10" type="text" />
+						<label for="ac">Armor Class</label>
+						<input name="ac" placeholder="10" type="text" />
 					</div>
 				</div>
 				<div class="initiative">
 					<div>
-						<label for="initiative">Initiative</label><input name="initiative" placeholder="+0" type="text" />
+						<label for="initiative">Initiative</label>
+						<input name="initiative" placeholder="+0" type="text" />
 					</div>
 				</div>
 				<div class="speed">
 					<div>
-						<label for="speed">Speed</label><input name="speed" placeholder="30" type="text" />
+						<label for="speed">Speed</label>
+						<input name="speed" placeholder="30" type="text" />
 					</div>
 				</div>
 				<div class="hp">
 					<div class="regular">
 						<div class="max">
-							<label for="maxhp">Hit Point Maximum</label><input name="maxhp" placeholder="10" type="text" />
+							<label for="maxhp">Hit Point Maximum</label><input name="maxhp" bind:value="{character.health.maximum}" type="number" />
 						</div>
 						<div class="current">
-							<label for="currenthp">Current Hit Points</label><input name="currenthp" type="text" />
+							<label for="currenthp">Current Hit Points</label>
+							<div style="margin: auto;">
+								<span class="hp_button" on:click="{updateHealth(-5)}">-5</span>
+								<span class="hp_button" on:click="{updateHealth(-1)}">-1</span>
+								<span class="hp_button" on:click="{updateHealth(1)}">+1</span>
+								<span class="hp_button" on:click="{updateHealth(5)}">+5</span>
+							</div>
+							<input name="currenthp" type="number" bind:value="{character.health.current}" />
 						</div>
 					</div>
 					<div class="temporary">
-						<label for="temphp">Temporary Hit Points</label><input name="temphp" type="text" />
+						<label for="temphp">Temporary Hit Points</label>
+						<input name="temphp" type="number" />
 					</div>
 				</div>
 				<div class="hitdice">
 					<div>
 						<div class="total">
-							<label for="totalhd">Total</label><input name="totalhd" placeholder="2d10" type="text" />
+							<label for="totalhd">Total</label>
+							<input name="totalhd" placeholder="2d10" type="text" />
 						</div>
 						<div class="remaining">
-							<label for="remaininghd">Hit Dice</label><input name="remaininghd" type="text" />
+							<label for="remaininghd">Hit Dice</label>
+							<input name="remaininghd" type="text" />
 						</div>
 					</div>
 				</div>
@@ -395,6 +437,49 @@
 
 
 <style>
+	.prof_button {
+		cursor: pointer;
+
+		border: 1px solid black;
+
+		width: 20px;
+		height: 20px;
+
+		border-radius: 10px;
+
+		font-size: 12px;
+		line-height: 20px;
+		text-align: center;
+
+
+		-webkit-user-select: none;  
+		-moz-user-select: none;    
+		-ms-user-select: none;      
+		user-select: none;
+	}
+
+	.hp_button {
+		display: inline;
+		cursor: pointer;
+
+		border: 1px solid black;
+
+		width: 30px;
+		height: 30px;
+
+		padding: 4px;
+
+		font-size: 14px;
+		line-height: 35px;
+		text-align: center;
+
+
+		-webkit-user-select: none;  
+		-moz-user-select: none;    
+		-ms-user-select: none;      
+		user-select: none;
+	}
+
 	.red {
 	  background: red;
 	}
@@ -725,6 +810,7 @@
 	  padding-top: 5px;
 	  padding-bottom: 5px;
 	  border-radius: 0 0 10px 10px;
+	  margin-top: -18px;
 	}
 	form.charsheet main section.combat > div.armorclass > div input, form.charsheet main section.combat > div.initiative > div input, form.charsheet main section.combat > div.speed > div input {
 	  height: 70px;
