@@ -1,26 +1,31 @@
+<script>
+	export let character = {};
+</script>
+
 <section class="charname">
-	<label for="charname">Character Name</label><input id="charname" name="charname" placeholder="Steve Fireforge" />
+	<label for="charname">Character Name</label><input id="charname" name="charname" value="{character.charname}"/>
 </section>
 
 <section class="misc">
 	<ul>
 		<li>
-			<label for="classlevel">Class & Level</label><input id="classlevel" name="classlevel" placeholder="Paladin 2" />
+			<label for="classlevel">Class & Level</label>
+			<input id="class" name="class" value="{character.charclass + " " + character.level}"/>
 		</li>
 		<li>
-			<label for="background">Background</label><input id="background" name="background" placeholder="Acolyte" />
+			<label for="background">Background</label><input id="background" name="background" value="{character.background}"/>
 		</li>
 		<li>
-			<label for="playername">Player Name</label><input id="playername" name="playername" placeholder="Player McPlayerface">
+			<label for="playername">Player Name</label><input id="playername" name="playername">
 		</li>
 		<li>
-			<label for="race">Race</label><input name="race" id="race" placeholder="Half-elf" />
+			<label for="race">Race</label><input name="race" id="race" value="{character.race}" />
 		</li>
 		<li>
-			<label for="alignment">Alignment</label><input name="alignment" placeholder="Lawful Good" />
+			<label for="alignment">Alignment</label><input name="alignment" value="{character.alignment}" />
 		</li>
 		<li>
-			<label for="experiencepoints">Experience Points</label><input name="experiencepoints" placeholder="3240" />
+			<label for="experiencepoints">Experience Points</label><input name="experiencepoints" value="{character.experience}"/>
 		</li>
 	</ul>
 </section>

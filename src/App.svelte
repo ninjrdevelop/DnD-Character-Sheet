@@ -1,182 +1,46 @@
 <script>
+	// Normal Imports
+	import { attributes, skillAttributes, skillLevels } from '.\\lib\\CHaracterConstants.js';
+	import Character5e from '.\\lib\\Character5e.js';
 
+	// Svelte Imports
 	import PlayerDetails from '.\\PlayerDetails.svelte';
-	import SkillsBlock from '.\\SkillsBlock.svelte';
 
-	let statlist = [
-		{name: 'strength', short: 'str'}, 
-		{name: 'dexterity', short: 'dex'}, 
-		{name: 'constitution', short: 'con'}, 
-		{name: 'wisdom', short: 'wis'}, 
-		{name: 'intelligence', short: 'int'},
-		{name: 'charisma', short: 'cha'}
-	];
+	// Create our character
+	let character = new Character5e({key: 'asdf'});
+	character.charclass = "Ur Mom";
+	character.charname = "Smutty McSmutFace";
+	character.background = "Test";
+	character.race = "wtf";
+	character.alignment = "lol";
+	character.experience = 3553;
+	character.health.maximum = 50;
+	character.setAttribute(attributes.STRENGTH, 16);
 
-	let abilitylist = [
-		{name: "Acrobatics", stat: "dexterity", small_name: 'acrobatics'},
-		{name: "Animal Handling", stat: "wisdom", small_name: 'animal_handling'},
-		{name: "Arcana", stat: "intelligence", small_name: 'arcana'},
-		{name: "Athletics", stat: "strength", small_name: 'athletics'},
-		{name: "Deception", stat: "charisma", small_name: 'deception'},
-		{name: "History", stat: "intelligence", small_name: 'history'},
-		{name: "Insight", stat: "wisdom", small_name: 'insight'},
-		{name: "Intimidation", stat: "charisma", small_name: 'intimidation'},
-		{name: "Investigation", stat: "intelligence", small_name: 'investigation'},
-		{name: "Medicine", stat: "wisdom", small_name: 'medicine'},
-		{name: "Nature", stat: "intelligence", small_name: 'nature'},
-		{name: "Perception", stat: "wisdom", small_name: 'perception'},
-		{name: "Performance", stat: "charisma", small_name: 'performance'},
-		{name: "Persuasion", stat: "charisma", small_name: 'persuasion'},
-		{name: "Religion", stat: "intelligence", small_name: 'religion'},
-		{name: "Sleight of Hand", stat: "dexterity", small_name: 'sleight_of_hand'},
-		{name: "Stealth", stat: "dexterity", small_name: 'stealth'},
-		{name: "Survival", stat: "wisdom", small_name: 'survival'}
-	]
+	console.log(skillAttributes.perception);
 
-	let character = {
-		health: {
-			current: 0,
-			maximum: 10,
-			temporary: 0
-		},
-		stats: {
-			strength: 10,
-			dexterity: 10,
-			constitution: 10,
-			wisdom: 10,
-			intelligence: 10,
-			charisma: 10
-		},
-		proficiency: 2,
-		stat_mods: {
-			strength: 0,
-			dexterity: 0,
-			constitution: 0,
-			wisdom: 0,
-			intelligence: 0,
-			charisma: 0
-		},
-		saving_throws: {
-			strength: {hasProf: 0, modifier: 0},
-			dexterity: {hasProf: 0, modifier: 0},
-			constitution: {hasProf: 0, modifier: 0},
-			wisdom: {hasProf: 0, modifier: 0},
-			intelligence: {hasProf: 0, modifier: 0},
-			charisma: {hasProf: 0, modifier: 0}
-		},
-		ability_mods: {
-			acrobatics: {profMult: 0, profLabel: "", modifier: 0},
-			animal_handling: {profMult: 0, profLabel: "", modifier: 0},
-			arcana: {profMult: 0, profLabel: "", modifier: 0},
-			athletics: {profMult: 0, profLabel: "", modifier: 0},
-			deception: {profMult: 0, profLabel: "", modifier: 0},
-			history: {profMult: 0, profLabel: "", modifier: 0},
-			insight: {profMult: 0, profLabel: "", modifier: 0},
-			intimidation: {profMult: 0, profLabel: "", modifier: 0},
-			investigation: {profMult: 0, profLabel: "", modifier: 0},
-			medicine: {profMult: 0, profLabel: "", modifier: 0},
-			nature: {profMult: 0, profLabel: "", modifier: 0},
-			perception: {profMult: 0, profLabel: "", modifier: 0},
-			performance: {profMult: 0, profLabel: "", modifier: 0},
-			persuasion: {profMult: 0, profLabel: "", modifier: 0},
-			religion: {profMult: 0, profLabel: "", modifier: 0},
-			sleight_of_hand: {profMult: 0, profLabel: "", modifier: 0},
-			stealth: {profMult: 0, profLabel: "", modifier: 0},
-			survival: {profMult: 0, profLabel: "", modifier: 0}
-		}
-	}
+	console.log(character.toJSON());
 
-	// Automatically calculate character stat modifiers when the stat itself changes
-	$: character.stat_mods.strength = Math.floor((character.stats.strength - 10) / 2);
-	$: character.stat_mods.dexterity = Math.floor((character.stats.dexterity - 10) / 2);
-	$: character.stat_mods.constitution = Math.floor((character.stats.constitution - 10) / 2);
-	$: character.stat_mods.wisdom = Math.floor((character.stats.wisdom - 10) / 2);
-	$: character.stat_mods.intelligence = Math.floor((character.stats.intelligence - 10) / 2);
-	$: character.stat_mods.charisma = Math.floor((character.stats.charisma - 10) / 2);
-
-	// Automatically calulate character stat saving throws when any of the following change: stat mod, proficiency, whether they have proficiency in that saving throw
-	$: character.saving_throws.strength.modifier = character.stat_mods.strength + (character.proficiency * character.saving_throws.strength.hasProf);
-	$: character.saving_throws.dexterity.modifier = character.stat_mods.dexterity + (character.proficiency * character.saving_throws.dexterity.hasProf);
-	$: character.saving_throws.constitution.modifier = character.stat_mods.constitution + (character.proficiency * character.saving_throws.constitution.hasProf);
-	$: character.saving_throws.wisdom.modifier = character.stat_mods.wisdom + (character.proficiency * character.saving_throws.wisdom.hasProf);
-	$: character.saving_throws.intelligence.modifier = character.stat_mods.intelligence + (character.proficiency * character.saving_throws.intelligence.hasProf);
-	$: character.saving_throws.charisma.modifier = character.stat_mods.charisma + (character.proficiency * character.saving_throws.charisma.hasProf);
-
-	// Automatically calculate character ability modifiers when any of the following change: stat mod, proficiency type (normal, half, expertise)
-	$: character.ability_mods.acrobatics.modifier = Math.floor(character.stat_mods.dexterity + (character.proficiency * character.ability_mods.acrobatics.profMult));
-	$: character.ability_mods.animal_handling.modifier = Math.floor(character.stat_mods.wisdom + (character.proficiency * character.ability_mods.animal_handling.profMult));
-	$: character.ability_mods.arcana.modifier = Math.floor(character.stat_mods.intelligence + (character.proficiency * character.ability_mods.arcana.profMult));
-	$: character.ability_mods.athletics.modifier = Math.floor(character.stat_mods.strength + (character.proficiency * character.ability_mods.athletics.profMult));
-	$: character.ability_mods.deception.modifier = Math.floor(character.stat_mods.charisma + (character.proficiency * character.ability_mods.deception.profMult));
-	$: character.ability_mods.history.modifier = Math.floor(character.stat_mods.intelligence + (character.proficiency * character.ability_mods.history.profMult));
-	$: character.ability_mods.insight.modifier = Math.floor(character.stat_mods.wisdom + (character.proficiency * character.ability_mods.insight.profMult));
-	$: character.ability_mods.intimidation.modifier = Math.floor(character.stat_mods.charisma + (character.proficiency * character.ability_mods.intimidation.profMult));
-	$: character.ability_mods.investigation.modifier = Math.floor(character.stat_mods.intelligence + (character.proficiency * character.ability_mods.investigation.profMult));
-	$: character.ability_mods.medicine.modifier = Math.floor(character.stat_mods.wisdom + (character.proficiency * character.ability_mods.medicine.profMult));
-	$: character.ability_mods.nature.modifier = Math.floor(character.stat_mods.intelligence + (character.proficiency * character.ability_mods.nature.profMult));
-	$: character.ability_mods.perception.modifier = Math.floor(character.stat_mods.wisdom + (character.proficiency * character.ability_mods.perception.profMult));
-	$: character.ability_mods.performance.modifier = Math.floor(character.stat_mods.charisma + (character.proficiency * character.ability_mods.performance.profMult));
-	$: character.ability_mods.persuasion.modifier = Math.floor(character.stat_mods.charisma + (character.proficiency * character.ability_mods.persuasion.profMult));
-	$: character.ability_mods.religion.modifier = Math.floor(character.stat_mods.intelligence + (character.proficiency * character.ability_mods.religion.profMult));
-	$: character.ability_mods.sleight_of_hand.modifier = Math.floor(character.stat_mods.dexterity + (character.proficiency * character.ability_mods.sleight_of_hand.profMult));
-	$: character.ability_mods.stealth.modifier = Math.floor(character.stat_mods.dexterity + (character.proficiency * character.ability_mods.stealth.profMult));
-	$: character.ability_mods.survival.modifier = Math.floor(character.stat_mods.wisdom + (character.proficiency * character.ability_mods.survival.profMult));
+	// Keep Initiative set properly
+	$: character.initiative = character.attributeModRaw(attributes.DEXTERITY);
 
 	// Helper arrays to assist with the 'change proficiency type' button on character ability list.
-	let proficiencyNames = ["", "*", "1/2", "2x"];
-	let proficiencyValues= [0,   1,   0.5,   2];
+	let proficiencyNames = {}
+	proficiencyNames[skillLevels.UNSKILLED] = "";
+	proficiencyNames[skillLevels.PROFICIENT] = "*"; 
+	proficiencyNames[skillLevels.EXPERT] = "2x";
 
-	function changeProfType(arr, stat) {
-		// Get the object-compatible name of the stat
-		let statName = stat.toLowerCase().replace(/ /g, '_');
+	// Helper array to keep track of the player HP. Svetle can't 
 
-		// Find the current proficiency level
-		let curProf = arr[statName].profMult
-		// And go to the next one
-		let index = proficiencyValues.indexOf(curProf) + 1;
-		if (index >= proficiencyValues.length) index -= proficiencyValues.length;
-
-		// Update the proficiency and label of the button
-		arr[statName].profMult = proficiencyValues[index];
-		arr[statName].profLabel = proficiencyNames[index];
-
-		// Trigger an update of the character stats.
-		character.proficiency = character.proficiency;
-	}
-
-	function updateHealth(amount) {
-		// Subtracting health
-		if (amount < 0) {
-			// If we've got temporary hitpoints, take these first
-			if (character.health.temporary > 0) {
-				// Add the (negative) adjustment amount to our temporary health total
-				character.health.temporary += amount;
-
-				// If that brings our temporary health under 0
-				if (character.health.temporary < 0) {
-					// Get the leftover
-					let left = Math.abs(character.health.temporary);
-					// Reset temporary to 0
-					character.health.temporary = 0;
-					// And take the leftover from our health pool
-					character.health.current -= left;
-				}
-			} 
-			// No temporary hitpoints
-			else {
-				// Add the (negative) adjustment amount to our current health total
-				character.health.current += amount;
-			}
-		}
-		// We're adding health
-		else {
-			// Add the health
-			character.health.current = character.health.current + amount;
-
-			// Ensure we don't go over our maximum
-			if (character.health.current > character.health.maximum)
-				character.health.current = character.health.maximum;
-		}
+	function changeProfType(skill) {
+		console.log(skill);
+		// Get and increment current proficiency level by 1
+		let prof = character.getSkill(skill) + 1;
+		// Ensure we don't go over Expertise
+		if (prof > skillLevels.EXPERT) prof = 0;
+		// Update the character with the new skill level
+		character.setSkill(skill, prof);
+		console.log(character.getSkill(skill));
 	}
 
 	// Helper function to capitalise first letter of a string
@@ -184,25 +48,30 @@
 		return str[0].toUpperCase() + str.substring(1)
 	}
 
+	// Helper function to make skill names human readable
+	function humanReadable(str) {
+		return str.replace(/_/g, ' ');
+	}
+
 </script>
 
 <form class="charsheet">
 	<header>
 		<!-- PlayerDetails.svelte component! -->
-		<PlayerDetails />
+		<PlayerDetails character={character}/>
 	</header>
 	<main>
 		<section>
 			<section class="attributes">
 				<div class="scores">
 					<ul>
-						{#each statlist as {name}, i}
+						{#each Object.keys(attributes) as name}
 						<li>
 							<div class="score">
-								<label for="{name}score">{name.toUpperCase()}</label><input name="{name}score" type="number" bind:value={character.stats[name]} placeholder="10" />
+								<label for="{name}score">{name}</label><input name="{name}score" type="number" bind:value={character[attributes[name]]} placeholder="10" />
 							</div>
 							<div class="modifier">
-								<input name="{name}mod" value="{character.stat_mods[name]}" />
+								<input name="{name}mod" type="text" disabled value="{character.attributeModRaw(attributes[name])}" />
 							</div>
 						</li>
 						{/each}
@@ -220,15 +89,15 @@
 						<div class="label-container">
 							<label for="proficiencybonus">Proficiency Bonus</label>
 						</div>
-						<input name="proficiencybonus" placeholder="+2" bind:value={character.proficiency} />
+						<input name="proficiencybonus" disabled bind:value={character.proficiencyRaw} />
 					</div>
 					<div class="saves list-section box">
 						<ul>
-							{#each statlist as {name}, i}
+							{#each Object.keys(attributes) as name}
 							<li>
 								<label for="{name}-save">{capitalise(name)}</label>
-								<input name="{name}-save" type="text" bind:value="{character.saving_throws[name].modifier}" />
-								<input name="{name}-prof" type="checkbox" bind:checked="{character.saving_throws[name].hasProf}" />
+								<input name="{name}-save" type="text" disabled value="{character.saveMod(attributes[name])}" />
+								<input name="{name}-prof" type="checkbox" bind:checked="{character.saves[attributes[name]]}" />
 							</li>
 							{/each}
 						</ul>
@@ -238,11 +107,11 @@
 					</div>
 					<div class="skills list-section box">
 						<ul>
-							{#each abilitylist as {name, stat, small_name}, i}
+							{#each Object.keys(skillAttributes) as name}
 							<li>
-								<label for="{small_name}">{name} <span class="skill">({capitalise(stat)})</span></label>
-								<input name="{small_name}" type="text" bind:value="{character.ability_mods[small_name].modifier}" />
-								<div class="prof_button" on:click="{e => changeProfType(character.ability_mods, small_name)}">{character.ability_mods[small_name].profLabel}</div>
+								<label for="{skillAttributes[name]}">{humanReadable(name).toUpperCase()} <span class="skill">({capitalise(skillAttributes[name])})</span></label>
+								<input name="{skillAttributes[name]}" disabled type="text" value="{character.getSkillMod(name)}" />
+								<div class="prof_button" on:click="{e => {changeProfType(name); character=character;}}">{proficiencyNames[character.getSkill(name)]}</div>
 							</li>
 							{/each}
 						</ul>
@@ -256,7 +125,7 @@
 				<div class="label-container">
 					<label for="passiveperception">Passive Wisdom (Perception)</label>
 				</div>
-				<input name="passiveperception" placeholder="10" />
+				<input name="passiveperception" disabled value="{character.passivePerception}" />
 			</div>
 			<div class="otherprofs box textblock">
 				<label for="otherprofs">Other Proficiencies and Languages</label><textarea name="otherprofs"></textarea>
@@ -267,19 +136,19 @@
 				<div class="armorclass">
 					<div>
 						<label for="ac">Armor Class</label>
-						<input name="ac" placeholder="10" type="text" />
+						<input name="ac" disabled value="{character.armor_class}" type="text" />
 					</div>
 				</div>
 				<div class="initiative">
 					<div>
 						<label for="initiative">Initiative</label>
-						<input name="initiative" placeholder="+0" type="text" />
+						<input name="initiative" disabled value="{character.initiative}" type="text" />
 					</div>
 				</div>
 				<div class="speed">
 					<div>
 						<label for="speed">Speed</label>
-						<input name="speed" placeholder="30" type="text" />
+						<input name="speed" value="{character.speed}" type="text" />
 					</div>
 				</div>
 				<div class="hp">
@@ -290,12 +159,16 @@
 						<div class="current">
 							<label for="currenthp">Current Hit Points</label>
 							<div style="margin: auto;">
-								<span class="hp_button" on:click="{e => updateHealth(-5)}">-5</span>
-								<span class="hp_button" on:click="{e => updateHealth(-1)}">-1</span>
-								<span class="hp_button" on:click="{e => updateHealth(1)}">+1</span>
-								<span class="hp_button" on:click="{e => updateHealth(5)}">+5</span>
+								<span class="hp_button" on:click="{e => {character.updateHealth(-5); character.health = character.health}}">-5</span>
+								<span class="hp_button" on:click="{e => {character.updateHealth(-1); character.health = character.health}}">-1</span>
+								<span class="hp_button" on:click="{e => {character.updateHealth(1); character.health = character.health}}">+1</span>
+								<span class="hp_button" on:click="{e => {character.updateHealth(5); character.health = character.health}}">+5</span>
+								<span class="hp_button">
+									<input class="hp_custom" name="hp_custom" type="number" on:keyup="{e => {if (e.keyCode === 13) {character.updateHealth(parseInt(e.target.value));character.health = character.health}
+									}}" />
+								</span>
 							</div>
-							<input name="currenthp" type="number" bind:value="{character.health.current}" />
+							<input name="currenthp" type="number" bind:value="{character.hp}" />
 						</div>
 					</div>
 					<div class="temporary">
@@ -307,11 +180,11 @@
 					<div>
 						<div class="total">
 							<label for="totalhd">Total</label>
-							<input name="totalhd" placeholder="2d10" type="text" />
+							<input name="totalhd" value="{character.hd_max + " " + character.hd_type}" type="text" disabled />
 						</div>
 						<div class="remaining">
 							<label for="remaininghd">Hit Dice</label>
-							<input name="remaininghd" type="text" />
+							<input name="remaininghd" type="number" value="{character.hd_cur}" />
 						</div>
 					</div>
 				</div>
@@ -494,6 +367,12 @@
 		user-select: none;
 	}
 
+	.hp_custom {
+		display: inline;
+		width: 60px !important;
+		padding:  2px !important;
+	}
+
 	.red {
 	  background: red;
 	}
@@ -610,6 +489,9 @@
 	  padding: 10px 0px 5px 0px;
 	  display: flex;
 	  flex-wrap: wrap;
+
+	  margin-top: 0px;
+	  margin-bottom:  0px;
 	}
 	form.charsheet header section.misc ul li {
 	  width: 33.33333%;
@@ -626,7 +508,7 @@
 	form.charsheet main {
 	  display: flex;
 	  justify-content: space-between;
-	  margin-top: 20px;
+	  margin-top: 5px;
 	}
 	form.charsheet main div.label-container {
 	  position: relative;
@@ -816,7 +698,7 @@
 	}
 	form.charsheet main section.combat > div.armorclass > div label, form.charsheet main section.combat > div.initiative > div label, form.charsheet main section.combat > div.speed > div label {
 	  font-size: 8px;
-	  width: 50px;
+	  width: 45px;
 	  border: 1px solid black;
 	  border-top: 0;
 	  background-color: white;
@@ -824,11 +706,11 @@
 	  padding-top: 5px;
 	  padding-bottom: 5px;
 	  border-radius: 0 0 10px 10px;
-	  margin-top: -18px;
+	  /*margin-top: -18px;*/
 	}
 	form.charsheet main section.combat > div.armorclass > div input, form.charsheet main section.combat > div.initiative > div input, form.charsheet main section.combat > div.speed > div input {
-	  height: 70px;
-	  width: 70px;
+	  height: 44px;
+	  width: 60px;
 	  border-radius: 10px;
 	  border: 1px solid black;
 	  text-align: center;
@@ -860,6 +742,7 @@
 	  border-bottom: 1px solid #ddd;
 	  font-size: 12px;
 	  text-align: center;
+	  padding: 6px;
 	}
 	form.charsheet main section.combat > div.hp > div.regular > div.current {
 	  display: flex;
@@ -868,7 +751,7 @@
 	form.charsheet main section.combat > div.hp > div.regular > div.current input {
 	  border: 0;
 	  width: 100%;
-	  padding: 1em 0;
+	  padding: 0.5em 0;
 	  font-size: 20px;
 	  text-align: center;
 	}
@@ -880,6 +763,7 @@
 	}
 	form.charsheet main section.combat > div.hp > div.temporary {
 	  margin: 10px;
+	  margin-bottom:  0px;
 	  margin-top: 0;
 	  border: 1px solid black;
 	  border-radius: 0 0 10px 10px;
@@ -1124,3 +1008,4 @@
 	  height: 43em;
 	}
 </style>
+
