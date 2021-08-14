@@ -161,7 +161,7 @@ export default class Character5e {
         this.experience = experience;
         this.inspiration = inspiration;
         this.armor_class = armor_class;
-        this.initiative = initiative;
+        this._initiative = initiative;
         this.speed = speed;
         this.health = health;
         this.hd_cur = hd_cur;
@@ -254,6 +254,13 @@ export default class Character5e {
      */
     get hp_temp() {
         return this.health.temporary;
+    }
+    /**
+     * Initiative getter.
+     * @returns {Number}
+     */
+    get initiative() {
+        return this._initiative;
     }
     /**
      * A quick summary header for use in lists.
