@@ -5,7 +5,12 @@ import { split } from "apollo-link";
 import { HttpLink } from "apollo-link-http";
 import { getMainDefinition } from "apollo-utilities";
 
-const headers = {'content-type': 'application/json'};
+const authToken = 'rzrLHhpxSQiKAsw6TKV9chfG0iFUgbDIal4r45543Xyvs3ofsWFtkdiOg7138jZ8';
+
+const headers = {
+  'content-type': 'application/json',
+  'x-hasura-admin-secret': `${authToken}`
+};
 const getHeaders = () => {
   return headers;
 };

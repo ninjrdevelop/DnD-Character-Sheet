@@ -2,7 +2,9 @@
 	// Database imports
 	import ApolloClient from 'apollo-client';
 	import { client } from '.\\lib\\db.js';
-	import { setClient } from 'svelte-apollo';
+	import { setClient, query } from 'svelte-apollo';
+	import gql from 'graphql-tag';
+
 	// Normal Imports
 	import { attributes, skillAttributes, skillLevels } from '.\\lib\\CHaracterConstants.js';
 	import Character5e from '.\\lib\\Character5e.js';
@@ -13,18 +15,26 @@
 	// Setup database client
 	setClient(client);
 
+	let queryData = {}
+
+	async function getCharacter() {
+		let result = await query(client, {
+		query: gql`
+			{
+				characters(limit: 1){
+					id
+					character_name
+					character_info
+				}
+			}
+			`
+		});
+		console.log(result);
+	}
+	getCharacter();
+
 	// Create our character
 	let character = new Character5e({key: 'asdf'});
-	character.charclass = "Ur Mom";
-	character.charname = "Smutty McSmutFace";
-	character.background = "Test";
-	character.race = "wtf";
-	character.alignment = "lol";
-	character.experience = 3553;
-	character.health.maximum = 50;
-	character.setAttribute(attributes.STRENGTH, 16);
-
-console.log(JSON.stringify(character.toJSON()));
 
 	// Helper arrays to assist with the 'change proficiency type' button on character ability list.
 	let proficiencyNames = {}
@@ -58,9 +68,11 @@ console.log(JSON.stringify(character.toJSON()));
 </script>
 
 <form class="charsheet">
-	<!-- {%await $character} -->
+	{#await $queryData}
 		<h2>Loading character</h2>
-	<!-- {:then } -->
+	}
+	{:then result}
+	{console.log(result)}
 	<header>
 		<!-- PlayerDetails.svelte component! -->
 		<PlayerDetails character={character}/>
@@ -320,6 +332,9 @@ console.log(JSON.stringify(character.toJSON()));
 			</section>
 		</section>
 	</main>
+	{:catch error}
+		<h2>Error loading character: {error}</h2>
+	{/await}
 </form>
 
 
