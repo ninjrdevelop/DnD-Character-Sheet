@@ -17,13 +17,6 @@
 	character.health.maximum = 50;
 	character.setAttribute(attributes.STRENGTH, 16);
 
-	console.log(skillAttributes.perception);
-
-	console.log(character.toJSON());
-
-	// Keep Initiative set properly
-	$: character.initiative = character.attributeModRaw(attributes.DEXTERITY);
-
 	// Helper arrays to assist with the 'change proficiency type' button on character ability list.
 	let proficiencyNames = {}
 	proficiencyNames[skillLevels.UNSKILLED] = "";
@@ -45,7 +38,7 @@
 
 	// Helper function to capitalise first letter of a string
 	function capitalise(str) {
-		return str[0].toUpperCase() + str.substring(1)
+		return str[0].toUpperCase() + str.substring(1);
 	}
 
 	// Helper function to make skill names human readable
@@ -276,19 +269,16 @@
 					<div class="money">
 						<ul>
 							<li>
-								<label for="cp">cp</label><input name="cp" />
+								<label for="cp">cp</label><input name="cp" value="{character.cp}"/>
 							</li>
 							<li>
-								<label for="sp">sp</label><input name="sp" />
+								<label for="sp">sp</label><input name="sp" value="{character.sp}" />
 							</li>
 							<li>
-								<label for="ep">ep</label><input name="ep" />
+								<label for="gp">gp</label><input name="gp" value="{character.gp}" />
 							</li>
 							<li>
-								<label for="gp">gp</label><input name="gp" />
-							</li>
-							<li>
-								<label for="pp">pp</label><input name="pp" />
+								<label for="pp">pp</label><input name="pp" value="{character.pp}" />
 							</li>
 						</ul>
 					</div>
@@ -302,13 +292,13 @@
 					<label for="personality">Personality</label><textarea name="personality"></textarea>
 				</div>
 				<div class="ideals">
-					<label for="ideals">Ideals</label><textarea name="ideals"></textarea>
+					<label for="ideals">Ideals</label><textarea name="ideals" value="{character.ideals}"></textarea>
 				</div>
 				<div class="bonds">
-					<label for="bonds">Bonds</label><textarea name="bonds"></textarea>
+					<label for="bonds">Bonds</label><textarea name="bonds" value="{character.bonds}"></textarea>
 				</div>
 				<div class="flaws">
-					<label for="flaws">Flaws</label><textarea name="flaws"></textarea>
+					<label for="flaws">Flaws</label><textarea name="flaws" value="{character.flaws}"></textarea>
 				</div>
 			</section>
 			<section class="features">
