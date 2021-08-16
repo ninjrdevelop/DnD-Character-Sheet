@@ -5,11 +5,11 @@ import { split } from "apollo-link";
 import { HttpLink } from "apollo-link-http";
 import { getMainDefinition } from "apollo-utilities";
 
-const authToken = 'rzrLHhpxSQiKAsw6TKV9chfG0iFUgbDIal4r45543Xyvs3ofsWFtkdiOg7138jZ8';
+import { dbAuthKey, dbURL } from '.\\db_auth.js';
 
 const headers = {
   'content-type': 'application/json',
-  'x-hasura-admin-secret': `${authToken}`
+  'x-hasura-admin-secret': `${dbAuthKey}`
 };
 const getHeaders = () => {
   return headers;
@@ -18,7 +18,7 @@ const getHeaders = () => {
 const cache = new InMemoryCache();
 
 const wsLink = new WebSocketLink({
-  uri: "https://free-turtle-47.hasura.app/v1/graphql",
+  uri: dbURL,
   options: {
     reconnect: true,
     lazy: true,
@@ -29,7 +29,7 @@ const wsLink = new WebSocketLink({
 });
 
 const httpLink = new HttpLink({
-  uri: "https://free-turtle-47.hasura.app/v1/graphql",
+  uri: dbURL,
   headers: getHeaders()
 });
 
