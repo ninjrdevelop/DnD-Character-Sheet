@@ -12,37 +12,35 @@
 	// Svelte Imports
 	import PlayerDetails from '.\\PlayerDetails.svelte';
 
+	// Create our character
+	let character = new Character5e({key: 'asdf'});
+
 	// Setup database client
 	setClient(client);
 
-	let queryData = {}
-
-	async function getCharacter() {
-		let result = await query(client, {
+	let queryData = query(client, {
 		query: gql`
 			{
-				characters(limit: 1){
+				characters(where: {id: {_eq: "11d8089f-8aee-40c5-a931-6b027bce0fa9"}}) {
 					id
+					character_data
 					character_name
-					character_info
 				}
 			}
 			`
-		});
-		console.log(result);
-	}
-	getCharacter();
+	});
 
-	// Create our character
-	let character = new Character5e({key: 'asdf'});
+	console.log(queryData);
+
+	async function getCharacter(queryData) {
+		character = await queryData();
+	}
 
 	// Helper arrays to assist with the 'change proficiency type' button on character ability list.
 	let proficiencyNames = {}
 	proficiencyNames[skillLevels.UNSKILLED] = "";
 	proficiencyNames[skillLevels.PROFICIENT] = "*"; 
 	proficiencyNames[skillLevels.EXPERT] = "2x";
-
-	// Helper array to keep track of the player HP. Svetle can't 
 
 	function changeProfType(skill) {
 		console.log(skill);
@@ -69,10 +67,11 @@
 
 <form class="charsheet">
 	{#await $queryData}
-		<h2>Loading character</h2>
-	}
+		<div class="center">
+			<div class="loader"></div>
+			<h2>Loading character</h2>
+		</div>
 	{:then result}
-	{console.log(result)}
 	<header>
 		<!-- PlayerDetails.svelte component! -->
 		<PlayerDetails character={character}/>
@@ -339,6 +338,29 @@
 
 
 <style>
+	html, body {
+		height: 100%;
+	}
+	.center {
+		margin: auto;
+		position: relative;
+		text-align: center;
+		top: 50%;
+		width: 20%;  
+	}
+	.loader {
+		border: 16px solid #f3f3f3; /* Light grey */
+		border-top: 16px solid #3498db; /* Blue */
+		border-radius: 50%;
+		width: 120px;
+		height: 120px;
+		animation: spin 2s linear infinite;
+	}
+
+	@keyframes spin {
+		0% { transform: rotate(0deg); }
+		100% { transform: rotate(360deg); }
+	}
 	.prof_button {
 		cursor: pointer;
 
