@@ -1,10 +1,17 @@
 <script>
+	// Database imports
+	import ApolloClient from 'apollo-client';
+	import { client } from '.\\lib\\db.js';
+	import { setClient } from 'svelte-apollo';
 	// Normal Imports
 	import { attributes, skillAttributes, skillLevels } from '.\\lib\\CHaracterConstants.js';
 	import Character5e from '.\\lib\\Character5e.js';
 
 	// Svelte Imports
 	import PlayerDetails from '.\\PlayerDetails.svelte';
+
+	// Setup database client
+	setClient(client);
 
 	// Create our character
 	let character = new Character5e({key: 'asdf'});
@@ -16,6 +23,8 @@
 	character.experience = 3553;
 	character.health.maximum = 50;
 	character.setAttribute(attributes.STRENGTH, 16);
+
+console.log(JSON.stringify(character.toJSON()));
 
 	// Helper arrays to assist with the 'change proficiency type' button on character ability list.
 	let proficiencyNames = {}
@@ -49,6 +58,9 @@
 </script>
 
 <form class="charsheet">
+	<!-- {%await $character} -->
+		<h2>Loading character</h2>
+	<!-- {:then } -->
 	<header>
 		<!-- PlayerDetails.svelte component! -->
 		<PlayerDetails character={character}/>
