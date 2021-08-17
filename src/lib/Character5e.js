@@ -61,12 +61,12 @@ export default class Character5e {
         wis = 10,
         cha = 10,
         saves = {
-            'str': 0,
-            'dex': 0,
-            'con': 0,
-            'int': 0,
-            'wis': 0,
-            'cha': 0
+            '_str': 0,
+            '_dex': 0,
+            '_con': 0,
+            '_int': 0,
+            '_wis': 0,
+            '_cha': 0
         },
         passive_perception = 10,
         skills = {
@@ -145,9 +145,7 @@ export default class Character5e {
             7: [],
             8: [],
             9: []
-        },
-        updated = '',
-        key_prev = ''
+        }
     }) {
         this.app = 'character-sheet-5e';
         this.key = key;
@@ -169,12 +167,12 @@ export default class Character5e {
         this.hd_type = hd_type;
         this.deathSave = deathSave;
         this.class_points = class_points;
-        this.str = str;
-        this.dex = dex;
-        this.con = con;
-        this.int = int;
-        this.wis = wis;
-        this.cha = cha;
+        this._str = str;
+        this._dex = dex;
+        this._con = con;
+        this._int = int;
+        this._wis = wis;
+        this._cha = cha;
         this.saves = saves;
         this.passive_perception = passive_perception;
         this.skills = skills;
@@ -204,8 +202,8 @@ export default class Character5e {
         this.spell_slots = spell_slots;
         this.spell_slots_cur = spell_slots_cur;
         this.spells = spells;
-        this.updated = updated;
-        this.key_prev = key_prev;
+
+        this.dirty = false;
     }
     /**
      * Level getter.
@@ -227,6 +225,8 @@ export default class Character5e {
         this._level = newVal;
         const newProf = this.proficiency;
 
+        this.dirty = true;
+
         // Ensure the HitDie max is updated (as it is based on level)
         this.hd_max = newVal;
 
@@ -247,6 +247,7 @@ export default class Character5e {
      */
     set hp(newVal) {
         this.health.current = newVal;
+        this.dirty = true;
     }
     /**
      * Temporary HP getter.
@@ -255,6 +256,31 @@ export default class Character5e {
     get hp_temp() {
         return this.health.temporary;
     }
+    
+    // Getter and setter for strength
+    get str() { return this._str; }
+    set str(newVal) { this._str = newVal; this.dirty = true; }
+    
+    // Getter and setter for dexterity
+    get dex() { return this._dex; }
+    set dex(newVal) { this._dex = newVal; this.dirty = true; }
+    
+    // Getter and setter for constitution
+    get con() { return this._con; }
+    set con(newVal) { this._con = newVal; this.dirty = true; }
+    
+    // Getter and setter for intellect
+    get int() { return this._int; }
+    set int(newVal) { this._int = newVal; this.dirty = true; }
+    
+    // Getter and setter for wisdom
+    get wis() { return this._wis; }
+    set wis(newVal) { this._wis = newVal; this.dirty = true; }
+    
+    // Getter and setter for charisma
+    get cha() { return this._cha; }
+    set cha(newVal) { this._cha = newVal; this.dirty = true; }
+
     /**
      * Initiative getter.
      * @returns {Number}
@@ -303,6 +329,7 @@ export default class Character5e {
             return;
         }
         this[attribute] = value;
+        this.dirty = true;
     }
     /**
      * Get modifier for an attribute.
@@ -401,6 +428,7 @@ export default class Character5e {
             return;
         }
         this.skills[skill] = newValue;
+        this.dirty = true;
     }
     /**
      * Is the attribute save proficient.
@@ -449,6 +477,7 @@ export default class Character5e {
             return;
         }
         this.saves[attr] = (checked ? 1 : 0);
+        this.dirty = true;
     }
     /**
      * Update health value by a certain amount.
@@ -488,6 +517,7 @@ export default class Character5e {
                 this.health.current = this.health.maximum;
         }
         this.health = this.health;
+        this.dirty = true;
     }
     /**
      * Converting _ props for saving.
@@ -506,6 +536,7 @@ export default class Character5e {
                 obj[prop] = this[prop];
             }
         });
+        this.dirty = false;
         return obj;
     }
 };

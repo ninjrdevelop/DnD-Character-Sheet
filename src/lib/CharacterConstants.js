@@ -5,12 +5,12 @@
  * Matching attribute full names to the character properties.
  */
 export const attributes = Object.freeze({
-    STRENGTH: 'str',
-    DEXTERITY: 'dex',
-    CONSTITUTION: 'con',
-    INTELLIGENCE: 'int',
-    WISDOM: 'wis',
-    CHARISMA: 'cha'
+    STRENGTH: '_str',
+    DEXTERITY: '_dex',
+    CONSTITUTION: '_con',
+    INTELLIGENCE: '_int',
+    WISDOM: '_wis',
+    CHARISMA: '_cha'
 });
 
 /**

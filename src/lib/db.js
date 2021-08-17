@@ -1,48 +1,55 @@
-import ApolloClient from "apollo-client";
-import { InMemoryCache } from "apollo-cache-inmemory";
-import { WebSocketLink } from "apollo-link-ws";
-import { split } from "apollo-link";
-import { HttpLink } from "apollo-link-http";
-import { getMainDefinition } from "apollo-utilities";
-
 import { dbAuthKey, dbURL } from '.\\db_auth.js';
 
-const headers = {
-  'content-type': 'application/json',
-  'x-hasura-admin-secret': `${dbAuthKey}`
-};
-const getHeaders = () => {
-  return headers;
-};
+class DBClient {
+    constructor ({
+        url = '',
+        auth_key = ''
+    }) {
+        this.url = url;
+        this.headers = {
+            'x-hasura-admin-secret': auth_key
+        }
+        this.queries = {};
+    }
 
-const cache = new InMemoryCache();
+    addQuery(queryName, query, requiresVariables) {
+        this.queries[queryName] = {
+            query: query,
+            variables: requiresVariables
+        }
+    }
 
-const wsLink = new WebSocketLink({
-  uri: dbURL,
-  options: {
-    reconnect: true,
-    lazy: true,
-    connectionParams: () => {
-      return { headers: getHeaders() };
-    },
-  },
-});
+    query(queryName, variables=null) {
+        if (!(queryName in this.queries)) return -1;
+        if (this.queries.variables && variables===null) return -2;
 
-const httpLink = new HttpLink({
-  uri: dbURL,
-  headers: getHeaders()
-});
+        let body = this.queries[queryName].query
+        
+        if (variables !== null) {
+            let keys = Object.keys(variables);
 
-const link = split(
-  ({ query }) => {
-    const { kind, operation } = getMainDefinition(query);
-    return kind === "OperationDefinition" && operation === "subscription";
-  },
-  wsLink,
-  httpLink
-);
+            for(var i = 0; i < keys.length; i++) {
+                if (body.query.search(keys[i]) != -1) {
+                    let v = variables[keys[i]].replace(/\"/g, "\\\"");
 
-export const client = new ApolloClient({
-  link,
-  cache
-});
+                    body.query = body.query
+                                        .replace('$'+keys[i], v);
+                }
+            }
+        }
+
+        return fetch(this.url, {
+            method: 'POST',
+            headers: this.headers,
+            body: JSON.stringify(body)
+        })
+            .then((res) => {
+                return res.json();
+            })
+            .then((data) => {
+                return data;
+            });
+    }
+}
+
+export const client = new DBClient({url: dbURL, auth_key: dbAuthKey})

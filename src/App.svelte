@@ -2,11 +2,11 @@
 	// Database imports
 	import ApolloClient from 'apollo-client';
 	import { client } from '.\\lib\\db.js';
-	import { setClient, query } from 'svelte-apollo';
+	// import { fetchGetCharacter, executeUpdateCharacter } from '.\\lib\\db.js';
 	import gql from 'graphql-tag';
 
 	// Normal Imports
-	import { attributes, skillAttributes, skillLevels } from '.\\lib\\CHaracterConstants.js';
+	import { attributes, skillAttributes, skillLevels } from '.\\lib\\CharacterConstants.js';
 	import Character5e from '.\\lib\\Character5e.js';
 
 	// Svelte Imports
@@ -15,26 +15,65 @@
 	// Create our character
 	let character = new Character5e({key: 'asdf'});
 
-	// Setup database client
-	setClient(client);
+	let loadingCharacter = true;
 
-	let queryData = query(client, {
-		query: gql`
-			{
-				characters(where: {id: {_eq: "11d8089f-8aee-40c5-a931-6b027bce0fa9"}}) {
+	let characterID = "11d8089f-8aee-40c5-a931-6b027bce0fa9";
+
+	client.addQuery("getCharacter", {
+		query: `
+			query GetCharacter {
+				characters(where: {id: {_eq: "$characterID"}}) {
 					id
 					character_data
 					character_name
 				}
 			}
-			`
-	});
+		`
+	})
+	client.addQuery("updateCharacter", {
+		query: `
+			mutation UpdateCharacter {
+				update_characters(where: {id: {_eq: "$characterID"}}, _set: {character_data: "$characterData"}){
+					returning {
+						character_data
+						character_name
+						id
+					}
+				}
+			}
+		`
+	}, true);
 
-	console.log(queryData);
+	let saveDelay = 2000;
+	function saveCharacter() {
+		console.log(!loadingCharacter, character.dirty);
+		setTimeout(saveCharacter, saveDelay);
 
-	async function getCharacter(queryData) {
-		character = await queryData();
+		if (!loadingCharacter && character.dirty) {
+			console.log('Character dirty! Saving');
+			let data = character.toJSON();
+	
+			client.query("updateCharacter", {
+				characterID: characterID,
+				characterData: JSON.stringify(data)
+			}).then((res) => console.log(res));
+	
+			return true;
+		}
 	}
+	setTimeout(saveCharacter, saveDelay);
+
+	client.query("getCharacter", {characterID: characterID})
+			.then((data) => {
+				console.log('Character loaded');
+				let charData = data.data.characters[0].character_data.replace(/\\\"/g, "\"");
+				charData = JSON.parse(charData);
+
+				console.log(charData);
+
+				character = new Character5e(charData);
+				loadingCharacter = false;
+			});
 
 	// Helper arrays to assist with the 'change proficiency type' button on character ability list.
 	let proficiencyNames = {}
@@ -66,12 +105,12 @@
 </script>
 
 <form class="charsheet">
-	{#await $queryData}
+	{#if loadingCharacter}
 		<div class="center">
 			<div class="loader"></div>
 			<h2>Loading character</h2>
 		</div>
-	{:then result}
+	{/if}
 	<header>
 		<!-- PlayerDetails.svelte component! -->
 		<PlayerDetails character={character}/>
@@ -84,7 +123,7 @@
 						{#each Object.keys(attributes) as name}
 						<li>
 							<div class="score">
-								<label for="{name}score">{name}</label><input name="{name}score" type="number" bind:value={character[attributes[name]]} placeholder="10" />
+								<label for="{name}score">{name}</label><input name="{name}score" type="number" bind:value={character[attributes[name].substr(1)]} placeholder="10" />
 							</div>
 							<div class="modifier">
 								<input name="{name}mod" type="text" disabled value="{character.attributeModRaw(attributes[name])}" />
@@ -105,7 +144,7 @@
 						<div class="label-container">
 							<label for="proficiencybonus">Proficiency Bonus</label>
 						</div>
-						<input name="proficiencybonus" disabled bind:value={character.proficiencyRaw} />
+						<input name="proficiencybonus" disabled value={character.proficiencyRaw} />
 					</div>
 					<div class="saves list-section box">
 						<ul>
@@ -113,7 +152,7 @@
 							<li>
 								<label for="{name}-save">{capitalise(name)}</label>
 								<input name="{name}-save" type="text" disabled value="{character.saveMod(attributes[name])}" />
-								<input name="{name}-prof" type="checkbox" bind:checked="{character.saves[attributes[name]]}" />
+								<input name="{name}-prof" type="checkbox" bind:checked="{character.saves[attributes[name]]}" on:click="{character.dirty = true}" />
 							</li>
 							{/each}
 						</ul>
@@ -331,9 +370,6 @@
 			</section>
 		</section>
 	</main>
-	{:catch error}
-		<h2>Error loading character: {error}</h2>
-	{/await}
 </form>
 
 
@@ -343,10 +379,12 @@
 	}
 	.center {
 		margin: auto;
-		position: relative;
+		position: absolute;
 		text-align: center;
-		top: 50%;
+		top: 30%;
+		left: 30%;
 		width: 20%;  
+		z-index: 9001;
 	}
 	.loader {
 		border: 16px solid #f3f3f3; /* Light grey */
