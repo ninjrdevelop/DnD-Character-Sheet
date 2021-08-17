@@ -26,7 +26,6 @@ export default class Character5e {
      * @prop {Object} skills Skill and its level. 0/1/2 (See skillLevels).
      */
     constructor ({
-        key = '',
         charname = '',
         charclass = '',
         race = '',
@@ -149,7 +148,6 @@ export default class Character5e {
         }
     }) {
         this.app = 'character-sheet-5e';
-        this.key = key;
         this.charname = charname;
         this.charclass = charclass;
         this.race = race;
@@ -527,7 +525,6 @@ export default class Character5e {
         else this.deathSave.success -= 1;
 
         this.dirty = true;
-        console.log(this.deathSave.success)
         this.deathSave = this.deathSave;
     }
     toggleDeathFail(added) {
@@ -535,7 +532,6 @@ export default class Character5e {
         else this.deathSave.fail -= 1;
 
         this.dirty = true;
-        console.log(this.deathSave.fail)
         this.deathSave = this.deathSave;
     }
     /**

@@ -1,4 +1,7 @@
 <script>
+	// Import common functions
+	import { getQueryVariable } from '.\\lib\\common.js';
+
 	// Database imports
 	import ApolloClient from 'apollo-client';
 	import { client } from '.\\lib\\db.js';
@@ -16,8 +19,9 @@
 	let character = new Character5e({key: 'asdf'});
 
 	let loadingCharacter = true;
+	let loadingMessage = "Loading Character";
 
-	let characterID = "11d8089f-8aee-40c5-a931-6b027bce0fa9";
+	let characterID = getQueryVariable('charID');
 
 	client.addQuery("getCharacter", {
 		query: `
@@ -29,7 +33,7 @@
 				}
 			}
 		`
-	})
+	}, true)
 	client.addQuery("updateCharacter", {
 		query: `
 			mutation UpdateCharacter {
@@ -43,10 +47,31 @@
 			}
 		`
 	}, true);
+	client.addQuery("addCharacter", {
+		query: `
+			mutation AddCharacter {
+				insert_characters_one(object: {character_data: "$characterData", character_name: "asdf"}) {
+					id
+    				character_data
+				}
+			}
+		`
+	})
 
 	let saveDelay = 2000;
 	let fullSaveDelay = 60000;
 
+	function loadCharacter() {
+		client.query("getCharacter", {characterID: characterID})
+				.then((data) => {
+					console.log('Character loaded');
+					let charData = data.data.characters[0].character_data.replace(/\\\"/g, "\"");
+					charData = JSON.parse(charData);
+
+					character = new Character5e(charData);
+					loadingCharacter = false;
+				});
+	}
 	function saveCharacter(force = false) {
 		// Set next timer
 		if (!force) setTimeout(saveCharacter, saveDelay);
@@ -55,27 +80,38 @@
 		if ((!loadingCharacter && character.dirty) || force) {
 			console.log('Character dirty! Saving');
 			let data = character.toJSON();
+			loadingCharacter = true;
+			loadingMessage = "Saving Character";
 	
-			client.query("updateCharacter", {
+			let q = client.query("updateCharacter", {
 				characterID: characterID,
 				characterData: JSON.stringify(data)
-			});//.then((res) => console.log(res));
+			}).then((res) => loadingCharacter = false);
 	
 			return true;
 		}
 	}
+	function newCharacter() {
+		console.log('Attemping to create new character');
+		client.query('addCharacter', {
+			characterData: JSON.stringify(new Character5e({key: 'asdf'}).toJSON())
+		}).then((res) => {
+			console.log(res);
+
+			characterID = res.data.insert_characters_one.id;
+			let characterData = res.data.insert_characters_one.character_data;
+
+			character = new Character5e(characterData);
+		})
+	}
+
+	// Timers to automatically save the current character
 	setTimeout(saveCharacter, saveDelay);
 	setTimeout(function() { saveCharacter(true); }, fullSaveDelay);
 
-	client.query("getCharacter", {characterID: characterID})
-			.then((data) => {
-				console.log('Character loaded');
-				let charData = data.data.characters[0].character_data.replace(/\\\"/g, "\"");
-				charData = JSON.parse(charData);
+	// Get the current character.
+	loadCharacter();
 
-				character = new Character5e(charData);
-				loadingCharacter = false;
-			});
 
 	// Helper arrays to assist with the 'change proficiency type' button on character ability list.
 	let proficiencyNames = {}
@@ -108,9 +144,12 @@
 	{#if loadingCharacter}
 		<div class="center">
 			<div class="loader"></div>
-			<h2>Loading character</h2>
+			<h2>{loadingMessage}</h2>
 		</div>
 	{/if}
+	<div id="menu">
+		<button on:click|preventDefault={e => newCharacter()}>New Character</button>
+	</div>
 	<header>
 		<!-- PlayerDetails.svelte component! -->
 		<PlayerDetails character={character}/>
@@ -377,21 +416,27 @@
 	html, body {
 		height: 100%;
 	}
+	#menu {
+		position: absolute;
+		top: 0px;
+		left: 0px;
+		padding:  8px;
+	}
 	.center {
 		margin: auto;
 		position: absolute;
 		text-align: center;
-		top: 30%;
-		left: 30%;
-		width: 20%;  
+		top: calc(50% - 60px);
+		left: calc(50% - 60px);
+		width: 10%;  
 		z-index: 9001;
 	}
 	.loader {
 		border: 16px solid #f3f3f3; /* Light grey */
 		border-top: 16px solid #3498db; /* Blue */
 		border-radius: 50%;
-		width: 120px;
-		height: 120px;
+		width: 60px;
+		height: 60px;
 		animation: spin 2s linear infinite;
 	}
 
