@@ -13,19 +13,19 @@
 			<input id="class" name="class" value="{character.charclass + " " + character.level}"/>
 		</li>
 		<li>
-			<label for="background">Background</label><input id="background" name="background" value="{character.background}"/>
+			<label for="background">Background</label><input id="background" name="background" value="{character.background}" on:change={() => character.dirty = true}/>
 		</li>
 		<li>
-			<label for="playername">Player Name</label><input id="playername" name="playername">
+			<label for="playername">Player Name</label><input id="playername" name="playername" on:change={() => character.dirty = true}>
 		</li>
 		<li>
-			<label for="race">Race</label><input name="race" id="race" value="{character.race}" />
+			<label for="race">Race</label><input name="race" id="race" value="{character.race}" on:change={() => character.dirty = true} />
 		</li>
 		<li>
-			<label for="alignment">Alignment</label><input name="alignment" value="{character.alignment}" />
+			<label for="alignment">Alignment</label><input name="alignment" value="{character.alignment}" on:change={() => character.dirty = true} />
 		</li>
 		<li>
-			<label for="experiencepoints">Experience Points</label><input name="experiencepoints" value="{character.experience}"/>
+			<label for="experiencepoints">Experience Points</label><input name="experiencepoints" value="{character.experience}" on:change={() => character.dirty = true} />
 		</li>
 	</ul>
 </section>

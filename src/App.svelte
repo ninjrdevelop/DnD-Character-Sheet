@@ -45,31 +45,33 @@
 	}, true);
 
 	let saveDelay = 2000;
-	function saveCharacter() {
-		console.log(!loadingCharacter, character.dirty);
-		setTimeout(saveCharacter, saveDelay);
+	let fullSaveDelay = 60000;
 
-		if (!loadingCharacter && character.dirty) {
+	function saveCharacter(force = false) {
+		// Set next timer
+		if (!force) setTimeout(saveCharacter, saveDelay);
+		else setTimeout(function() { saveCharacter(true); }, fullSaveDelay);
+
+		if ((!loadingCharacter && character.dirty) || force) {
 			console.log('Character dirty! Saving');
 			let data = character.toJSON();
 	
 			client.query("updateCharacter", {
 				characterID: characterID,
 				characterData: JSON.stringify(data)
-			}).then((res) => console.log(res));
+			});//.then((res) => console.log(res));
 	
 			return true;
 		}
 	}
 	setTimeout(saveCharacter, saveDelay);
+	setTimeout(function() { saveCharacter(true); }, fullSaveDelay);
 
 	client.query("getCharacter", {characterID: characterID})
 			.then((data) => {
 				console.log('Character loaded');
 				let charData = data.data.characters[0].character_data.replace(/\\\"/g, "\"");
 				charData = JSON.parse(charData);
-
-				console.log(charData);
 
 				character = new Character5e(charData);
 				loadingCharacter = false;
@@ -82,14 +84,12 @@
 	proficiencyNames[skillLevels.EXPERT] = "2x";
 
 	function changeProfType(skill) {
-		console.log(skill);
 		// Get and increment current proficiency level by 1
 		let prof = character.getSkill(skill) + 1;
 		// Ensure we don't go over Expertise
 		if (prof > skillLevels.EXPERT) prof = 0;
 		// Update the character with the new skill level
 		character.setSkill(skill, prof);
-		console.log(character.getSkill(skill));
 	}
 
 	// Helper function to capitalise first letter of a string
@@ -183,7 +183,7 @@
 				<input name="passiveperception" disabled value="{character.passivePerception}" />
 			</div>
 			<div class="otherprofs box textblock">
-				<label for="otherprofs">Other Proficiencies and Languages</label><textarea name="otherprofs"></textarea>
+				<label for="otherprofs">Other Proficiencies and Languages</label><textarea name="otherprofs" value="{character.proficiencies_other}" on:change={() => character.dirty = true}></textarea>
 			</div>
 		</section>
 		<section>
@@ -191,25 +191,25 @@
 				<div class="armorclass">
 					<div>
 						<label for="ac">Armor Class</label>
-						<input name="ac" disabled value="{character.armor_class}" type="text" />
+						<input name="ac" value="{character.armor_class}" on:change={() => character.dirty = true} type="text" />
 					</div>
 				</div>
 				<div class="initiative">
 					<div>
 						<label for="initiative">Initiative</label>
-						<input name="initiative" disabled value="{character.initiative}" type="text" />
+						<input name="initiative" disabled bind:value="{character.initiative}" type="text" />
 					</div>
 				</div>
 				<div class="speed">
 					<div>
 						<label for="speed">Speed</label>
-						<input name="speed" value="{character.speed}" type="text" />
+						<input name="speed" value="{character.speed}" type="text" on:change={() => character.dirty = true} />
 					</div>
 				</div>
 				<div class="hp">
 					<div class="regular">
 						<div class="max">
-							<label for="maxhp">Hit Point Maximum</label><input name="maxhp" bind:value="{character.health.maximum}" type="number" />
+							<label for="maxhp">Hit Point Maximum</label><input name="maxhp" bind:value="{character.health.maximum}" on:change={() => character.dirty = true} type="number" />
 						</div>
 						<div class="current">
 							<label for="currenthp">Current Hit Points</label>
@@ -219,7 +219,7 @@
 								<span class="hp_button" on:click="{e => {character.updateHealth(1); character.health = character.health}}">+1</span>
 								<span class="hp_button" on:click="{e => {character.updateHealth(5); character.health = character.health}}">+5</span>
 								<span class="hp_button">
-									<input class="hp_custom" name="hp_custom" type="number" on:keyup="{e => {if (e.keyCode === 13) {character.updateHealth(parseInt(e.target.value));character.health = character.health}
+									<input class="hp_custom" name="hp_custom" type="number" on:keyup="{e => {if (e.keyCode === 13) {character.updateHealth(parseInt(e.target.value)); character.health = character.health}
 									}}" />
 								</span>
 							</div>
@@ -228,7 +228,7 @@
 					</div>
 					<div class="temporary">
 						<label for="temphp">Temporary Hit Points</label>
-						<input name="temphp" type="number" bind:value="{character.health.temporary}" />
+						<input name="temphp" type="number" bind:value="{character.health.temporary}" on:change={() => character.dirty = true} />
 					</div>
 				</div>
 				<div class="hitdice">
@@ -239,7 +239,7 @@
 						</div>
 						<div class="remaining">
 							<label for="remaininghd">Hit Dice</label>
-							<input name="remaininghd" type="number" value="{character.hd_cur}" />
+							<input name="remaininghd" type="number" value="{character.hd_cur}" on:change={() => character.dirty = true} />
 						</div>
 					</div>
 				</div>
@@ -252,17 +252,17 @@
 							<div class="deathsuccesses">
 								<label>Successes</label>
 								<div class="bubbles">
-									<input name="deathsuccess1" type="checkbox" />
-									<input name="deathsuccess2" type="checkbox" />
-									<input name="deathsuccess3" type="checkbox" />
+									<input name="deathsuccess1" type="checkbox" checked={character.deathSave.success > 0 ? true : false} on:click={(e) => {character.toggleDeathSuccess(e.target.checked)}} />
+									<input name="deathsuccess2" type="checkbox" checked={character.deathSave.success > 1 ? true : false} on:click={(e) => {character.toggleDeathSuccess(e.target.checked)}} />
+									<input name="deathsuccess3" type="checkbox" checked={character.deathSave.success > 2 ? true : false} on:click={(e) => {character.toggleDeathSuccess(e.target.checked)}} />
 								</div>
 							</div>
 							<div class="deathfails">
 								<label>Failures</label>
 								<div class="bubbles">
-									<input name="deathfail1" type="checkbox" />
-									<input name="deathfail2" type="checkbox" />
-									<input name="deathfail3" type="checkbox" />
+									<input name="deathfail1" type="checkbox" checked={character.deathSave.fail > 0 ? true : false} on:click={(e) => {character.toggleDeathFail(e.target.checked)}} />
+									<input name="deathfail2" type="checkbox" checked={character.deathSave.fail > 1 ? true : false} on:click={(e) => {character.toggleDeathFail(e.target.checked)}} />
+									<input name="deathfail3" type="checkbox" checked={character.deathSave.fail > 2 ? true : false} on:click={(e) => {character.toggleDeathFail(e.target.checked)}} />
 								</div>
 							</div>
 						</div>
@@ -331,16 +331,16 @@
 					<div class="money">
 						<ul>
 							<li>
-								<label for="cp">cp</label><input name="cp" value="{character.cp}"/>
+								<label for="cp">cp</label><input name="cp" value="{character.cp}" on:change={() => character.dirty = true}/>
 							</li>
 							<li>
-								<label for="sp">sp</label><input name="sp" value="{character.sp}" />
+								<label for="sp">sp</label><input name="sp" value="{character.sp}" on:change={() => character.dirty = true} />
 							</li>
 							<li>
-								<label for="gp">gp</label><input name="gp" value="{character.gp}" />
+								<label for="gp">gp</label><input name="gp" value="{character.gp}" on:change={() => character.dirty = true} />
 							</li>
 							<li>
-								<label for="pp">pp</label><input name="pp" value="{character.pp}" />
+								<label for="pp">pp</label><input name="pp" value="{character.pp}" on:change={() => character.dirty = true} />
 							</li>
 						</ul>
 					</div>
@@ -351,21 +351,21 @@
 		<section>
 			<section class="flavor">
 				<div class="personality">
-					<label for="personality">Personality</label><textarea name="personality"></textarea>
+					<label for="personality">Personality</label><textarea name="personality" value="{character.personality}" on:change={() => character.dirty = true}></textarea>
 				</div>
 				<div class="ideals">
-					<label for="ideals">Ideals</label><textarea name="ideals" value="{character.ideals}"></textarea>
+					<label for="ideals">Ideals</label><textarea name="ideals" value="{character.ideals}" on:change={() => character.dirty = true}></textarea>
 				</div>
 				<div class="bonds">
-					<label for="bonds">Bonds</label><textarea name="bonds" value="{character.bonds}"></textarea>
+					<label for="bonds">Bonds</label><textarea name="bonds" value="{character.bonds}" on:change={() => character.dirty = true}></textarea>
 				</div>
 				<div class="flaws">
-					<label for="flaws">Flaws</label><textarea name="flaws" value="{character.flaws}"></textarea>
+					<label for="flaws">Flaws</label><textarea name="flaws" value="{character.flaws}" on:change={() => character.dirty = true}></textarea>
 				</div>
 			</section>
 			<section class="features">
 				<div>
-					<label for="features">Features & Traits</label><textarea name="features"></textarea>
+					<label for="features">Features & Traits</label><textarea name="features" value="{character.features}" on:change={() => character.dirty = true}></textarea>
 				</div>
 			</section>
 		</section>

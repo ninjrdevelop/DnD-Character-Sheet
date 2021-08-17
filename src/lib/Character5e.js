@@ -92,6 +92,7 @@ export default class Character5e {
         weapons = [],
         proficiencies_other = '',
         languages = '',
+        personality='',
         traits = '',
         ideals = '',
         bonds = '',
@@ -179,6 +180,7 @@ export default class Character5e {
         this.weapons = weapons;
         this.proficiencies_other = proficiencies_other;
         this.languages = languages;
+        this.personality = personality;
         this.traits = traits;
         this.ideals = ideals;
         this.bonds = bonds;
@@ -286,6 +288,7 @@ export default class Character5e {
      * @returns {Number}
      */
     get initiative() {
+        return this.getSkillModRaw(attributes.DEXTERITY);
         return this._initiative;
     }
     /**
@@ -518,6 +521,22 @@ export default class Character5e {
         }
         this.health = this.health;
         this.dirty = true;
+    }
+    toggleDeathSuccess(added) {
+        if (added) this.deathSave.success += 1;
+        else this.deathSave.success -= 1;
+
+        this.dirty = true;
+        console.log(this.deathSave.success)
+        this.deathSave = this.deathSave;
+    }
+    toggleDeathFail(added) {
+        if (added) this.deathSave.fail += 1;
+        else this.deathSave.fail -= 1;
+
+        this.dirty = true;
+        console.log(this.deathSave.fail)
+        this.deathSave = this.deathSave;
     }
     /**
      * Converting _ props for saving.
